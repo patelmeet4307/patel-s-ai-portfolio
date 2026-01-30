@@ -37,82 +37,85 @@ const Carousel3D = ({ items, direction = "left", speed = 20 }: { items: any[], d
   }, []);
 
   const itemWidth = isMobile ? 220 : 300;
+  const itemHeight = isMobile ? 80 : 100; // Used for vertical calculation
+  const gap = isMobile ? 20 : 0; // Simulated gap for vertical math
   const count = items.length;
 
-  // Responsive radius
-  // Mobile: tighter circle to fit screen
-  // Desktop: wider ellipse
-  const xRadius = isMobile
-    ? Math.min(window.innerWidth / 2 - itemWidth / 2 - 20, 180) // Limit radius on mobile to fit screen
-    : Math.max((count * itemWidth) / (2 * Math.PI) * 1.8, 600);
+  // Responsive radius configuration
+  // Desktop: Horizontal Ellipse
+  const xRadius = Math.max((count * itemWidth) / (2 * Math.PI) * 1.8, 600);
+  const zRadiusDesktop = xRadius * 0.6;
 
-  // Adjust Z depth for mobile to be less "deep"
-  const zRadius = isMobile ? xRadius * 0.8 : xRadius * 0.6;
+  // Mobile: Vertical Circle/Ellipse
+  // We need enough height to fit items without overlapping too much
+  const yRadius = isMobile
+    ? Math.max((count * (itemHeight + gap)) / (2 * Math.PI), 140)
+    : 0;
+  const zRadiusMobile = yRadius * 0.9;
+
+  // Final Z radius based on mode
+  const zRadius = isMobile ? zRadiusMobile : zRadiusDesktop;
 
   // Use a motion value for continuous rotation
   const rot = useMotionValue(0);
 
   // Animate the rotation
   useEffect(() => {
-    // Direction multiplier: left = 1 (clockwise for items), right = -1
-    // Actually, if we increase angle, sin/cos rotate one way. 
-    // We want separate controls.
     const dir = direction === "left" ? -1 : 1;
-    const duration = speed * 1000; // speed in seconds to ms? No typical speed is ~20s.
+    // On mobile, maybe we want 'up' or 'down' based on direction?
+    // Let's keep the same prop controlling the spin direction.
 
-    // Simple loop
-    const controls = animate(rot, 360 * dir, {
+    animate(rot, 360 * dir, {
       duration: speed,
       ease: "linear",
       repeat: Infinity,
       repeatType: "loop",
-      // We need to accumulate rotation to avoid "rewind" if we just loop 0-360, 
-      // but simpler: if we verify visual smoothness. 
-      // FRAMER MOTION `repeat: Infinity` resets to 'from' value.
-      // Smooth loop requires 0 and 360 to be identical positions.
-      // 360 deg is 0 deg. So yes, it works.
     });
-
-    return controls.stop;
   }, [direction, speed, rot]);
 
   return (
-    <div className="relative flex justify-center items-center h-[350px] perspective-container overflow-hidden w-full">
+    <div className={`relative flex justify-center items-center perspective-container overflow-visible w-full ${isMobile ? 'h-[400px]' : 'h-[350px]'}`}>
       <div
         className="relative preserve-3d w-full h-full flex items-center justify-center"
       >
         {items.map((item, index) => {
-          // Create a transform for each item dependent on 'rot'
-          // We can't use standard React render for high-perf animation frame usually, 
-          // but for <20 items it's okay? 
-          // Better: Use `useTransform` for each item.
-
           const itemAngleOffset = (index / count) * 360;
 
           const transform = useTransform(rot, (currentRotation) => {
             const theta = (currentRotation + itemAngleOffset) * (Math.PI / 180);
-            const x = xRadius * Math.sin(theta);
-            const z = zRadius * Math.cos(theta);
-            // We translate manually. No rotation applied to the div itself means it faces front.
-            return `translate3d(${x}px, 0, ${z}px)`;
+
+            if (isMobile) {
+              // Vertical Rotation (Rolodex / Ferris Wheel style)
+              // Rotate around X-axis implied by moving Y and Z.
+              const y = yRadius * Math.sin(theta);
+              const z = zRadius * Math.cos(theta);
+              // We translate Y and Z. X is centered (0).
+              return `translate3d(0, ${y}px, ${z}px)`;
+            } else {
+              // Horizontal Rotation (Carousel)
+              const x = xRadius * Math.sin(theta);
+              const z = zRadius * Math.cos(theta);
+              return `translate3d(${x}px, 0, ${z}px)`;
+            }
           });
 
-          // Opacity/Scale based on Z for effect? 
-          // Z is already handled by perspective, but to ensure "back" items are dimmed:
+          // Calculate Z properties for sorting and opacity
           const zRaw = useTransform(rot, (currentRotation) => {
             const theta = (currentRotation + itemAngleOffset) * (Math.PI / 180);
             return zRadius * Math.cos(theta);
           });
+
           const opacity = useTransform(zRaw, [-zRadius, zRadius], [0.5, 1]);
-          const zIndex = useTransform(zRaw, (z) => Math.round(z + 2000)); // Ensure correct sorting
+          const zIndex = useTransform(zRaw, (z) => Math.round(z + 2000));
 
           return (
             <motion.div
               key={index}
               className="absolute flex items-center justify-center backface-visible"
               style={{
-                width: itemWidth,
-                height: isMobile ? '80px' : '100px',
+                width: isMobile ? '90%' : itemWidth, // Full width on mobile looks better if centered
+                maxWidth: isMobile ? '280px' : 'none',
+                height: itemHeight,
                 transform,
                 opacity,
                 zIndex
@@ -122,7 +125,7 @@ const Carousel3D = ({ items, direction = "left", speed = 20 }: { items: any[], d
                 <div className="p-2 rounded-lg bg-primary/10 group-hover:bg-primary/20 transition-colors shrink-0">
                   <item.icon className={`text-primary ${isMobile ? 'w-5 h-5' : 'w-6 h-6'}`} />
                 </div>
-                <div className="overflow-hidden">
+                <div className="overflow-hidden text-left">
                   <h4 className={`text-foreground font-medium truncate ${isMobile ? 'text-sm' : 'text-lg'}`}>{item.name}</h4>
                   {!isMobile && (
                     <>
