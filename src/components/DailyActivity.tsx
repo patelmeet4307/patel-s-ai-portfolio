@@ -62,16 +62,20 @@ const Carousel3D = ({ items, direction = "left", speed = 20 }: { items: any[], d
   // Animate the rotation
   useEffect(() => {
     const dir = direction === "left" ? -1 : 1;
-    // On mobile, maybe we want 'up' or 'down' based on direction?
-    // Let's keep the same prop controlling the spin direction.
 
-    animate(rot, 360 * dir, {
-      duration: speed,
+    // Desktop: Slow, elegant rotation (using the passed 'speed' prop, e.g., 30s)
+    // Mobile: Faster, snappy vertical rotation (fixed at 10s)
+    const duration = isMobile ? 10 : speed;
+
+    const controls = animate(rot, 360 * dir, {
+      duration: duration,
       ease: "linear",
       repeat: Infinity,
       repeatType: "loop",
     });
-  }, [direction, speed, rot]);
+
+    return controls.stop;
+  }, [direction, speed, rot, isMobile]);
 
   return (
     <div className={`relative flex justify-center items-center perspective-container overflow-visible w-full ${isMobile ? 'h-[400px]' : 'h-[350px]'}`}>
@@ -190,13 +194,13 @@ const DailyActivity = () => {
         {/* Row 1: Tools - Rotating Left */}
         <div>
           <h3 className="text-center text-muted-foreground mb-4 font-display tracking-widest text-sm uppercase">Daily Tools</h3>
-          <Carousel3D items={activities} direction="left" speed={15} />
+          <Carousel3D items={activities} direction="left" speed={30} />
         </div>
 
         {/* Row 2: Technologies - Rotating Right */}
         <div>
           <h3 className="text-center text-muted-foreground mb-4 font-display tracking-widest text-sm uppercase">Technologies</h3>
-          <Carousel3D items={technologies} direction="right" speed={15} />
+          <Carousel3D items={technologies} direction="right" speed={35} />
         </div>
       </div>
     </section>
