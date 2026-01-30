@@ -105,7 +105,7 @@ const Carousel3D = ({ items, direction = "left", speed = 20 }: { items: any[], d
             return zRadius * Math.cos(theta);
           });
 
-          const opacity = useTransform(zRaw, [-zRadius, zRadius], [0.5, 1]);
+          const opacity = useTransform(zRaw, [-zRadius, zRadius], isMobile ? [0, 1] : [0.5, 1]);
           const zIndex = useTransform(zRaw, (z) => Math.round(z + 2000));
 
           return (
