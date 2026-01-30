@@ -105,7 +105,14 @@ const Carousel3D = ({ items, direction = "left", speed = 20 }: { items: any[], d
             return zRadius * Math.cos(theta);
           });
 
-          const opacity = useTransform(zRaw, [-zRadius, zRadius], isMobile ? [0, 1] : [0.5, 1]);
+          // Mobile: Only show front half (z > 0) to prevent overlap at top/bottom
+          // Desktop: Fade from back to front (z > -zRadius)
+          const opacity = useTransform(
+            zRaw,
+            isMobile ? [0, zRadius] : [-zRadius, zRadius],
+            isMobile ? [0, 1] : [0.5, 1]
+          );
+
           const zIndex = useTransform(zRaw, (z) => Math.round(z + 2000));
 
           return (
@@ -183,13 +190,13 @@ const DailyActivity = () => {
         {/* Row 1: Tools - Rotating Left */}
         <div>
           <h3 className="text-center text-muted-foreground mb-4 font-display tracking-widest text-sm uppercase">Daily Tools</h3>
-          <Carousel3D items={activities} direction="left" speed={30} />
+          <Carousel3D items={activities} direction="left" speed={15} />
         </div>
 
         {/* Row 2: Technologies - Rotating Right */}
         <div>
           <h3 className="text-center text-muted-foreground mb-4 font-display tracking-widest text-sm uppercase">Technologies</h3>
-          <Carousel3D items={technologies} direction="right" speed={35} />
+          <Carousel3D items={technologies} direction="right" speed={15} />
         </div>
       </div>
     </section>
