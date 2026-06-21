@@ -18,14 +18,14 @@ const Contact = () => {
     {
       icon: Github,
       label: 'GitHub',
-      value: 'patelmeet8057',
-      href: 'https://github.com/patelmeet8057',
+      value: 'patelmeet4307',
+      href: 'https://github.com/patelmeet4307',
     },
     {
       icon: Linkedin,
       label: 'LinkedIn',
-      value: 'patelmeet',
-      href: 'https://linkedin.com/in/patelmeet-410612a867',
+      value: 'patel-meet-41061a367',
+      href: 'https://www.linkedin.com/in/patel-meet-41061a367/',
     },
   ];
 
@@ -70,11 +70,11 @@ const Contact = () => {
               >
                 <link.icon className="w-8 h-8 text-primary" />
               </motion.div>
-              
+
               <h3 className="font-display text-lg font-semibold text-foreground mb-2 group-hover:text-primary transition-colors">
                 {link.label}
               </h3>
-              
+
               <p className="text-muted-foreground text-sm break-all">
                 {link.value}
               </p>
