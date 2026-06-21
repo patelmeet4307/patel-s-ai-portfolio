@@ -24,8 +24,8 @@ const Contact = () => {
     {
       icon: Linkedin,
       label: 'LinkedIn',
-      value: 'patelmeet',
-      href: 'https://linkedin.com/in/patelmeet-410612a867',
+      value: 'patel-meet-41061a367',
+      href: 'https://www.linkedin.com/in/patel-meet-41061a367/',
     },
   ];
 
